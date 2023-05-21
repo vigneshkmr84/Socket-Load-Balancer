@@ -29,8 +29,13 @@ public class LoadBalancerServiceMain {
         Thread printerThread = new Thread(new PrinterThread(concurrentHashMap));
         printerThread.start();
 
-        Thread healthCheckThread = new Thread(new HealthCheck(concurrentHashMap));
+        Thread healthCheckThread = new Thread(new HealthCheckThread(concurrentHashMap));
         healthCheckThread.start();
+
+        ServerThread serverThread = new ServerThread(concurrentHashMap, queue);
+//        Thread t = new Thread(serverThread);
+//        t.start();
+        serverThread.run();
 
     }
 }
