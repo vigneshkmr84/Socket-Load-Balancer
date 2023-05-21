@@ -9,9 +9,9 @@ public class SortedSetWithExample {
     public static void main(String[] args) {
 
         Comparator<Node> nodeComparator = (n1, n2) -> {
-            if (n1.getWeight() > n2.getWeight()){
+            if (n1.getWeight() > n2.getWeight()) {
                 return 1;
-            }else if (n1.getWeight()< n2.getWeight()){
+            } else if (n1.getWeight() < n2.getWeight()) {
                 return -1;
             }
             return 0;

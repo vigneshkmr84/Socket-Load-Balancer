@@ -1,7 +1,6 @@
 package org.learning.lbservice.temp;
 
 import org.learning.lbservice.Node;
-import org.learning.lbservice.NodeComparator;
 
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -9,14 +8,14 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class PriorityQueueMain {
 
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         Comparator<Node> nodeComparator = new Comparator<Node>() {
             @Override
             public int compare(Node n1, Node n2) {
-                if (n1.getRequestCount() > n2.getRequestCount()){
+                if (n1.getRequestCount() > n2.getRequestCount()) {
                     return 1;
-                }else if (n1.getRequestCount()< n2.getRequestCount()){
+                } else if (n1.getRequestCount() < n2.getRequestCount()) {
                     return -1;
                 }
                 return 0;

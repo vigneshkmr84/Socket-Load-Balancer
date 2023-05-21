@@ -2,10 +2,17 @@ package org.learning.lbservice;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class HealthCheck {
+public class HealthCheck implements Runnable {
 
     private static final Integer TIMEOUT_SECONDS = 1000; // 1 sec
+
+    private ConcurrentHashMap<String, Boolean> concurrentHashMap;
+
+    public HealthCheck(ConcurrentHashMap<String, Boolean> concurrentHashMap) {
+        this.concurrentHashMap = concurrentHashMap;
+    }
 
     public boolean isHealthy(String hostName) {
 
@@ -19,4 +26,8 @@ public class HealthCheck {
         }
     }
 
+    @Override
+    public void run() {
+
+    }
 }
