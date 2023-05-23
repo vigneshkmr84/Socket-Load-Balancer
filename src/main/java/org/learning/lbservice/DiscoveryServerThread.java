@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
-public class DiscoveryThread implements Runnable {
+public class DiscoveryServerThread implements Runnable {
 
     ConcurrentHashMap<String, Boolean> concurrentHashMap;
 
@@ -14,7 +14,7 @@ public class DiscoveryThread implements Runnable {
 
     Integer discoveryPort;
 
-    public DiscoveryThread(ConcurrentHashMap<String, Boolean> concurrentHashMap
+    public DiscoveryServerThread(ConcurrentHashMap<String, Boolean> concurrentHashMap
             , PriorityBlockingQueue<Node> queue
             , Integer discoveryPort) {
         this.concurrentHashMap = concurrentHashMap;
@@ -26,7 +26,7 @@ public class DiscoveryThread implements Runnable {
     public void run() {
 
         try (ServerSocket serverSocket = new ServerSocket(discoveryPort)) {
-            System.out.println("Discovery Server listening in : " + discoveryPort);
+            System.out.printf("Discovery Server listening in : %d\n", discoveryPort);
             while (true) {
                 Socket clientSocket = serverSocket.accept();
 
@@ -36,16 +36,16 @@ public class DiscoveryThread implements Runnable {
                 int port = Integer.parseInt(data);
 
                 String hostName = clientSocket.getInetAddress().getHostName();
-                System.out.println("Hostname : " + hostName + ", Port : " + port);
-
                 String fullHostName = hostName + ":" + port;
 
                 // if hostname not there, make an entry
-                // else if hostname is false reset the request count
-                if (!concurrentHashMap.containsKey(hostName)) {
+                if (!concurrentHashMap.containsKey(fullHostName)) {
                     concurrentHashMap.put(fullHostName, true);
                     queue.put(new Node(fullHostName, 1, 0));
-                } else if (!concurrentHashMap.get(fullHostName)) {
+                    System.out.printf("New Hostname Registered : %s, port : %s \n", hostName, port);
+                }
+                // else if hostname status is false reset the request count
+                else if (!concurrentHashMap.get(fullHostName)) {
                     concurrentHashMap.put(fullHostName, true);
                     queue.put(new Node(fullHostName, 1, 0));
                 }
@@ -53,7 +53,7 @@ public class DiscoveryThread implements Runnable {
                 clientSocket.close();
             }
         } catch (Exception ex) {
-            System.out.println("Exception occurred in listening : " + ex.getMessage());
+            System.out.println("Exception occurred in listening : \n" + ex.getMessage());
         }
     }
 }

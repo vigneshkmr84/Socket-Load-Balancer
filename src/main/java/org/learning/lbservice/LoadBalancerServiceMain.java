@@ -13,9 +13,9 @@ public class LoadBalancerServiceMain {
     public static void main(String[] args) {
 
         Comparator<Node> roundRobbinComparator = (n1, n2) -> {
-            if (n1.getWeight() > n2.getWeight()) {
+            if (n1.getRequestCount() > n2.getRequestCount()) {
                 return 1;
-            } else if (n1.getWeight() < n2.getWeight()) {
+            } else if (n1.getRequestCount() < n2.getRequestCount()) {
                 return -1;
             }
             return 0;
@@ -23,10 +23,10 @@ public class LoadBalancerServiceMain {
 
         PriorityBlockingQueue<Node> queue = new PriorityBlockingQueue<>(2, roundRobbinComparator);
 
-        Thread discoveryThread = new Thread(new DiscoveryThread(concurrentHashMap, queue, discoveryPort));
+        Thread discoveryThread = new Thread(new DiscoveryServerThread(concurrentHashMap, queue, discoveryPort));
         discoveryThread.start();
 
-        Thread printerThread = new Thread(new PrinterThread(concurrentHashMap));
+        Thread printerThread = new Thread(new PrinterThread(concurrentHashMap, queue));
         printerThread.start();
 
         Thread healthCheckThread = new Thread(new HealthCheckThread(concurrentHashMap));

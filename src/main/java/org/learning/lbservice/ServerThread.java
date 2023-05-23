@@ -1,14 +1,20 @@
 package org.learning.lbservice;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ServerThread {
     ConcurrentHashMap<String, Boolean> concurrentHashMap;
     PriorityBlockingQueue<Node> queue;
+
 
     public ServerThread(ConcurrentHashMap<String, Boolean> concurrentHashMap
             , PriorityBlockingQueue<Node> queue) {
@@ -25,7 +31,7 @@ public class ServerThread {
                 Socket clientSocket = serverSocket.accept();
 
                 // new thread for each incoming connection
-                Thread clientThread = new Thread(new ClientHandler(clientSocket));
+                Thread clientThread = new Thread(new ClientHandler(clientSocket, queue));
                 clientThread.start();
             }
 
@@ -38,10 +44,14 @@ public class ServerThread {
 
 class ClientHandler implements Runnable {
 
+    private static Lock lock = new ReentrantLock();
     private final Socket clientSocket;
 
-    public ClientHandler(Socket clientSocket) {
+    private PriorityBlockingQueue<Node> queue;
+
+    public ClientHandler(Socket clientSocket, PriorityBlockingQueue<Node> queue) {
         this.clientSocket = clientSocket;
+        this.queue = queue;
     }
 
     @Override
@@ -54,7 +64,7 @@ class ClientHandler implements Runnable {
             StringBuilder requestBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                System.out.println(line);
+//                System.out.println(line);
                 requestBuilder.append(line).append("\r\n");
             }
 
@@ -81,15 +91,14 @@ class ClientHandler implements Runnable {
             String httpMethod = requestParts[0];
             String uri = requestParts[1];
 
-            System.out.println("Method : " + httpMethod);
-            System.out.println("uri : " + uri);
+            System.out.println("Method : " + httpMethod + ", URI : " + uri);
 
             // Process the request and generate the response
             String response = handleRequest(httpMethod, uri);
             sendResponse(response, clientSocket);
 
             // Close the client connection
-            clientSocket.close();
+//            clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,23 +107,83 @@ class ClientHandler implements Runnable {
     private String handleRequest(String httpMethod, String uri) {
         // Handle different HTTP methods and URIs
         if (httpMethod.equals("GET")) {
-            return "HTTP/1.1 200 OK\r\n" +
-                    "Content-Type: text/plain\r\n" +
-                    "Content-Length: 12\r\n" +
-                    "\r\n" +
-                    "Hello, World!";
-        } else {
-            return "HTTP/1.1 404 Not Found\r\n" +
-                    "Content-Type: text/plain\r\n" +
-                    "Content-Length: 9\r\n" +
-                    "\r\n" +
-                    "Not Found";
+            lock.lock();
+            try {
+                System.out.println("PQ Length : " + queue.size());
+                Node host = queue.poll();
+                System.out.println("Node chosen : " + host.getHostName());
+                String response = restAPICall(host.getHostName(), uri);
+
+                // update request count and put it back in the PQ
+                Node updatedHost = new Node(host.getHostName(), host.getWeight(), host.getRequestCount() + 1);
+                queue.offer(updatedHost);
+
+                if (null != response) {
+
+                    return "HTTP/1.1 200 OK\r\n" +
+                            "Content-Type: text/plain\r\n" +
+                            "Content-Length: " + getContentLength(response) + "\r\n" +
+                            "\r\n" +
+                            response;
+                }else{
+                    System.out.println(host.getHostName() + " service returned a null response");
+                }
+
+            } catch (Exception e) {
+                System.out.println("Exception occurred in handle request : " + e.getMessage());
+            } finally {
+                lock.unlock();
+            }
+
         }
+        return "HTTP/1.1 404 Not Found\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "Content-Length: 9\r\n" +
+                "\r\n" +
+                "Not Found";
     }
 
     private void sendResponse(String response, Socket clientSocket) throws IOException {
         OutputStream outputStream = clientSocket.getOutputStream();
         outputStream.write(response.getBytes());
         outputStream.flush();
+    }
+
+    private Integer getContentLength(String response) {
+        return response.getBytes(StandardCharsets.UTF_8).length;
+    }
+
+    private String restAPICall(String hostName, String uri) {
+
+        try {
+            String u = "http://" + hostName + uri;
+            System.out.println(u);
+            URL finalURL = new URL(u);
+
+            HttpURLConnection connection = (HttpURLConnection) finalURL.openConnection();
+
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            int responseCode = connection.getResponseCode();
+
+            // buffered reader for reading the output
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line;
+            StringBuilder response = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            reader.close();
+//            System.out.printf("Response Code: %d, Response Body : %s \n", responseCode, response);
+
+            connection.disconnect();
+            return response.toString();
+
+        } catch (IOException e) {
+            System.out.println("Exception occurred in making REST API call : " + e.getMessage());
+        }
+
+        return null;
     }
 }
