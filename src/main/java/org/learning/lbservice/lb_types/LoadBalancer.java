@@ -4,7 +4,9 @@ import org.learning.lbservice.Node;
 
 import java.util.Comparator;
 
-public interface LBInterface {
+public interface LoadBalancer {
+
+    public Object getQueue();
 
     public Node getNextNode();
 
@@ -13,4 +15,6 @@ public interface LBInterface {
     public Comparator<Node> getComparator();
 
     public void print();
+
+    public String getType();
 }

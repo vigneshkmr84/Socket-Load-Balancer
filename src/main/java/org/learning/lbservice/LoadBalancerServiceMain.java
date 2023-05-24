@@ -1,5 +1,8 @@
 package org.learning.lbservice;
 
+import org.learning.lbservice.lb_types.LBFactory;
+import org.learning.lbservice.lb_types.LoadBalancer;
+
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -8,7 +11,7 @@ public class LoadBalancerServiceMain {
 
     private static final ConcurrentHashMap<String, Boolean> concurrentHashMap = new ConcurrentHashMap<>();
 
-    private static final Integer discoveryPort = 8082;
+//    private static final Integer discoveryPort = 8082;
 
     public static void main(String[] args) {
 
@@ -21,20 +24,24 @@ public class LoadBalancerServiceMain {
             return 0;
         };
 
-        PriorityBlockingQueue<Node> queue = new PriorityBlockingQueue<>(2, roundRobbinComparator);
+        Integer discoveryPort = Integer.parseInt(args[0]);
+        String lbType = args[1].toUpperCase();
 
-        Thread discoveryThread = new Thread(new DiscoveryServerThread(concurrentHashMap, queue, discoveryPort));
+        LBFactory factory = new LBFactory();
+        LoadBalancer loadBalancer = factory.getLB(lbType);
+
+        System.out.println("Load Balancer Type : " + loadBalancer.getType());
+
+        Thread discoveryThread = new Thread(new DiscoveryServerThread(concurrentHashMap, loadBalancer, discoveryPort));
         discoveryThread.start();
 
-        Thread printerThread = new Thread(new PrinterThread(concurrentHashMap, queue));
+        Thread printerThread = new Thread(new PrinterThread(concurrentHashMap, loadBalancer));
         printerThread.start();
 
         Thread healthCheckThread = new Thread(new HealthCheckThread(concurrentHashMap));
         healthCheckThread.start();
 
-        ServerThread serverThread = new ServerThread(concurrentHashMap, queue);
-//        Thread t = new Thread(serverThread);
-//        t.start();
+        ServerThread serverThread = new ServerThread(concurrentHashMap, loadBalancer);
         serverThread.run();
 
     }

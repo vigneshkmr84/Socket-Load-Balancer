@@ -4,9 +4,9 @@ import org.learning.lbservice.lb_types.impl.RandomSelector;
 import org.learning.lbservice.lb_types.impl.RoundRobin;
 import org.learning.lbservice.lb_types.impl.WeightedRoundRobin;
 
-public abstract class LBFactory {
+public class LBFactory {
 
-    public LBInterface getLB(String lbType){
+    public LoadBalancer getLB(String lbType){
 
         switch (lbType.toUpperCase()){
             case "ROUND_ROBIN": return new RoundRobin();

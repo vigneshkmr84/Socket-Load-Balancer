@@ -1,16 +1,21 @@
 package org.learning.lbservice.lb_types.impl;
 
 import org.learning.lbservice.Node;
-import org.learning.lbservice.lb_types.LBInterface;
+import org.learning.lbservice.lb_types.LoadBalancer;
 
 import java.util.*;
 
 
-public class RandomSelector implements LBInterface {
+public class RandomSelector implements LoadBalancer {
 
     // Synchronized List
     // alternate to Vectors
     List<Node> queue = Collections.synchronizedList(new ArrayList<>());
+
+    @Override
+    public List<Node> getQueue() {
+        return queue;
+    }
 
     @Override
     public Node getNextNode() {
@@ -31,5 +36,10 @@ public class RandomSelector implements LBInterface {
     @Override
     public void print() {
         queue.forEach(System.out::println);
+    }
+
+    @Override
+    public String getType() {
+        return "Random";
     }
 }

@@ -1,5 +1,7 @@
 package org.learning.lbservice;
 
+import org.learning.lbservice.lb_types.LoadBalancer;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.ServerSocket;
@@ -7,20 +9,22 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ServerThread {
     ConcurrentHashMap<String, Boolean> concurrentHashMap;
-    PriorityBlockingQueue<Node> queue;
+//    PriorityBlockingQueue<Node> queue;
+
+    LoadBalancer lb;
 
 
     public ServerThread(ConcurrentHashMap<String, Boolean> concurrentHashMap
-            , PriorityBlockingQueue<Node> queue) {
+            , LoadBalancer lb) {
 
         this.concurrentHashMap = concurrentHashMap;
-        this.queue = queue;
+//        this.queue = queue;
+        this.lb = lb;
     }
 
     //    @Override
@@ -31,7 +35,7 @@ public class ServerThread {
                 Socket clientSocket = serverSocket.accept();
 
                 // new thread for each incoming connection
-                Thread clientThread = new Thread(new ClientHandler(clientSocket, queue));
+                Thread clientThread = new Thread(new ClientHandler(clientSocket, lb));
                 clientThread.start();
             }
 
@@ -47,11 +51,14 @@ class ClientHandler implements Runnable {
     private static Lock lock = new ReentrantLock();
     private final Socket clientSocket;
 
-    private PriorityBlockingQueue<Node> queue;
+//    private PriorityBlockingQueue<Node> queue;
 
-    public ClientHandler(Socket clientSocket, PriorityBlockingQueue<Node> queue) {
+    LoadBalancer lb;
+
+    public ClientHandler(Socket clientSocket
+                         , LoadBalancer lb) {
         this.clientSocket = clientSocket;
-        this.queue = queue;
+        this.lb = lb;
     }
 
     @Override
@@ -64,7 +71,6 @@ class ClientHandler implements Runnable {
             StringBuilder requestBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
-//                System.out.println(line);
                 requestBuilder.append(line).append("\r\n");
             }
 
@@ -109,14 +115,13 @@ class ClientHandler implements Runnable {
         if (httpMethod.equals("GET")) {
             lock.lock();
             try {
-                System.out.println("PQ Length : " + queue.size());
-                Node host = queue.poll();
+                Node host = lb.getNextNode();
                 System.out.println("Node chosen : " + host.getHostName());
                 String response = restAPICall(host.getHostName(), uri);
 
                 // update request count and put it back in the PQ
                 Node updatedHost = new Node(host.getHostName(), host.getWeight(), host.getRequestCount() + 1);
-                queue.offer(updatedHost);
+                lb.insertNode(updatedHost);
 
                 if (null != response) {
 
@@ -175,7 +180,6 @@ class ClientHandler implements Runnable {
                 response.append(line);
             }
             reader.close();
-//            System.out.printf("Response Code: %d, Response Body : %s \n", responseCode, response);
 
             connection.disconnect();
             return response.toString();

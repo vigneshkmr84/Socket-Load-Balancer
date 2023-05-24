@@ -1,24 +1,25 @@
 package org.learning.lbservice;
 
+import org.learning.lbservice.lb_types.LoadBalancer;
+
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.PriorityBlockingQueue;
 
 public class PrinterThread implements Runnable {
 
     ConcurrentHashMap<String, Boolean> concurrentHashMap;
-    PriorityBlockingQueue<Node> queue;
+    LoadBalancer lb;
 
     public PrinterThread(ConcurrentHashMap<String, Boolean> concurrentHashMap
-            , PriorityBlockingQueue<Node> queue) {
+            , LoadBalancer lb) {
         this.concurrentHashMap = concurrentHashMap;
-        this.queue = queue;
+        this.lb = lb;
     }
 
     @Override
     public void run() {
         while (true) {
             System.out.println("Node Status : " + concurrentHashMap);
-            System.out.println(queue);
+            lb.print();
             try {
                 Thread.sleep(15000);
             } catch (InterruptedException e) {
