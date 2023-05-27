@@ -11,8 +11,6 @@ public class LoadBalancerServiceMain {
 
     private static final ConcurrentHashMap<String, Boolean> concurrentHashMap = new ConcurrentHashMap<>();
 
-//    private static final Integer discoveryPort = 8082;
-
     public static void main(String[] args) {
 
         Comparator<Node> roundRobbinComparator = (n1, n2) -> {

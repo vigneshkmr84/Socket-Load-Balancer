@@ -19,9 +19,9 @@ public class Node implements Comparable<Node>{
 
     Double avgResponseTime;
 
-    String svcName;
+    int svcName;
 
-    public Node(String hostName, Integer weight, Integer requestCount, String svcName){
+    public Node(String hostName, Integer weight, Integer requestCount, int svcName){
         this.hostName = hostName;
         this.weight = weight;
         this.requestCount = requestCount;
@@ -46,11 +46,6 @@ public class Node implements Comparable<Node>{
         Node other = (Node) obj;
         return Objects.equals(hostName, other.hostName);
     }
-
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(hostName);
-//    }
 
     @Override
     public int hashCode() {
