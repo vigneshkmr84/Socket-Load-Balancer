@@ -116,11 +116,19 @@ class ClientHandler implements Runnable {
             lock.lock();
             try {
                 Node host = lb.getNextNode();
+                long startTime = System.nanoTime();
                 System.out.println("Node chosen : " + host.getHostName());
                 String response = restAPICall(host.getHostName(), uri);
 
+                long endTime = System.nanoTime();
+
+                double requestTime = (endTime - startTime) / 1e6;
+
+                Double updatedAvgTime = (host.getAvgResponseTime()* host.getRequestCount() + requestTime)/(host.getRequestCount()+1);
+
                 // update request count and put it back in the PQ
-                Node updatedHost = new Node(host.getHostName(), host.getWeight(), host.getRequestCount() + 1);
+                Node updatedHost = new Node(host.getHostName(), host.getWeight()
+                        , host.getRequestCount() + 1, updatedAvgTime, host.getSvcName());
 //                lb.insertNode(updatedHost);
                 lb.updateNode(updatedHost);
 
@@ -137,6 +145,7 @@ class ClientHandler implements Runnable {
 
             } catch (Exception e) {
                 System.out.println("Exception occurred in handle request : " + e.getMessage());
+                e.printStackTrace();
             } finally {
                 lock.unlock();
             }

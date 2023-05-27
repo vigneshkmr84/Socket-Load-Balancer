@@ -17,12 +17,16 @@ public class Node implements Comparable<Node>{
 
     Integer requestCount;
 
-    Float avgResponseTime;
+    Double avgResponseTime;
 
-    public Node(String hostName, Integer weight, Integer requestCount){
+    String svcName;
+
+    public Node(String hostName, Integer weight, Integer requestCount, String svcName){
         this.hostName = hostName;
         this.weight = weight;
         this.requestCount = requestCount;
+        this.svcName = svcName;
+        this.avgResponseTime = 0.0;
     }
 
     @Override
