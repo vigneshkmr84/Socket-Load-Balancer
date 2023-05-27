@@ -18,7 +18,8 @@ public class RoundRobin implements LoadBalancer {
 
     @Override
     public Node getNextNode() {
-        return queue.poll();
+//        return queue.poll();
+        return queue.peek();
     }
 
     @Override
@@ -39,5 +40,11 @@ public class RoundRobin implements LoadBalancer {
     @Override
     public String getType() {
         return "Round Robin";
+    }
+
+    @Override
+    public void updateNode(Node node) {
+        queue.poll();
+        insertNode(node);
     }
 }

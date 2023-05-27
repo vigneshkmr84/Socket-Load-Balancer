@@ -12,8 +12,6 @@ public class DiscoveryServerThread implements Runnable {
 
     ConcurrentHashMap<String, Boolean> concurrentHashMap;
 
-//    PriorityBlockingQueue<Node> queue;
-
     LoadBalancer lb;
 
     Integer discoveryPort;
@@ -22,7 +20,6 @@ public class DiscoveryServerThread implements Runnable {
             , LoadBalancer lb
             , Integer discoveryPort) {
         this.concurrentHashMap = concurrentHashMap;
-//        this.queue = (PriorityBlockingQueue<Node>) lb.getQueue();
         this.lb = lb;
         this.discoveryPort = discoveryPort;
     }
@@ -58,7 +55,8 @@ public class DiscoveryServerThread implements Runnable {
                 clientSocket.close();
             }
         } catch (Exception ex) {
-            System.out.println("Exception occurred in listening : \n" + ex.getMessage());
+            System.out.println("Exception occurred in listening : \n" + ex);
+            ex.printStackTrace();
         }
     }
 }

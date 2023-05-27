@@ -1,21 +1,22 @@
 package org.learning.lbservice.temp;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Test {
     public static void main(String[] args) {
-        BlockingQueue<String> queue = new java.util.concurrent.ArrayBlockingQueue<>(10);
+        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        queue.add("Apple");
+        queue.add("Banana");
+        queue.add("Orange");
 
-        // Adding elements to the queue
-        queue.add("Element 1");
-        queue.add("Element 2");
-        queue.add("Element 3");
+        // Peek at the first element
+        String firstElement = queue.peek();
 
-        // Print elements in the queue
-        for (String element : queue) {
-            System.out.println(element);
-        }
-
-        System.out.println(queue.size());
+        System.out.println("First element: " + firstElement);
+        System.out.println("Queue size: " + queue.size());
+        queue.poll();
+        System.out.println("Queue size: " + queue.size());
     }
 }

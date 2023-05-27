@@ -36,4 +36,9 @@ public class WeightedRoundRobin implements LoadBalancer {
     public String getType() {
         return "Weighted Round Robin";
     }
+
+    @Override
+    public void updateNode(Node node) {
+
+    }
 }

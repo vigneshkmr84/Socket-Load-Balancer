@@ -17,4 +17,6 @@ public interface LoadBalancer {
     public void print();
 
     public String getType();
+
+    public void updateNode(Node node);
 }

@@ -13,14 +13,16 @@ public class Node implements Comparable<Node>{
 
     String hostName;
 
-//    Integer port;
-
     Integer weight;
 
     Integer requestCount;
 
-    public void incrementRequest() {
-        this.requestCount++;
+    Float avgResponseTime;
+
+    public Node(String hostName, Integer weight, Integer requestCount){
+        this.hostName = hostName;
+        this.weight = weight;
+        this.requestCount = requestCount;
     }
 
     @Override
@@ -41,8 +43,15 @@ public class Node implements Comparable<Node>{
         return Objects.equals(hostName, other.hostName);
     }
 
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(hostName);
+//    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(hostName);
+        return Objects.hash(hostName, weight, requestCount);
     }
+
+
 }

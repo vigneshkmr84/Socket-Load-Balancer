@@ -121,7 +121,8 @@ class ClientHandler implements Runnable {
 
                 // update request count and put it back in the PQ
                 Node updatedHost = new Node(host.getHostName(), host.getWeight(), host.getRequestCount() + 1);
-                lb.insertNode(updatedHost);
+//                lb.insertNode(updatedHost);
+                lb.updateNode(updatedHost);
 
                 if (null != response) {
 
