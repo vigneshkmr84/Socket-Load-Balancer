@@ -19,13 +19,13 @@ public class Node implements Comparable<Node>{
 
     Double avgResponseTime;
 
-    int svcName;
+    int nodeId;
 
-    public Node(String hostName, Integer weight, Integer requestCount, int svcName){
+    public Node(String hostName, Integer weight, Integer requestCount, int nodeId){
         this.hostName = hostName;
         this.weight = weight;
         this.requestCount = requestCount;
-        this.svcName = svcName;
+        this.nodeId = nodeId;
         this.avgResponseTime = 0.0;
     }
 
