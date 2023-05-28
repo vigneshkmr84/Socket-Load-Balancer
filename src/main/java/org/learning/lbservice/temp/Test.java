@@ -1,12 +1,12 @@
 package org.learning.lbservice.temp;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
+
+import java.util.concurrent.LinkedBlockingDeque;
+
 
 public class Test {
     public static void main(String[] args) {
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        LinkedBlockingDeque<String> queue = new LinkedBlockingDeque<>();
         queue.add("Apple");
         queue.add("Banana");
         queue.add("Orange");
@@ -17,6 +17,8 @@ public class Test {
         System.out.println("First element: " + firstElement);
         System.out.println("Queue size: " + queue.size());
         queue.poll();
+        queue.addFirst("first element");
         System.out.println("Queue size: " + queue.size());
+        System.out.println(queue);
     }
 }

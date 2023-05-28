@@ -104,7 +104,7 @@ class ClientHandler implements Runnable {
             sendResponse(response, clientSocket);
 
             // Close the client connection
-//            clientSocket.close();
+            clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
